@@ -31,6 +31,7 @@ export function createI18n<TMessages extends Messages = Messages>(
     t,
     n,
     fallbackLocale: options.fallbackLocale ?? options.locale,
+    nestedFallback: options.nestedFallback ?? false,
     d: createDateFormatter(store),
     nFormat: createNumberFormatter(store),
     c: createCurrencyFormatter(store),

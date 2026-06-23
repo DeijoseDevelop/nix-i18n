@@ -17,11 +17,12 @@ export function createTranslate<TMessages extends Messages>(
     const locale = i18n.locale.value;
     const messages = i18n.currentMessages.value as Partial<TMessages>;
     const fallback = i18n.fallbackMessages.value as Partial<TMessages>;
+    const nestedFallback = i18n.nestedFallback;
 
-    let resolved: string | undefined = resolveKey(messages, key);
+    let resolved: string | undefined = resolveKey(messages, key, nestedFallback);
 
     if (resolved === undefined && fallback) {
-      resolved = resolveKey(fallback, key);
+      resolved = resolveKey(fallback, key, nestedFallback);
     }
 
     if (resolved === undefined) {
@@ -29,8 +30,8 @@ export function createTranslate<TMessages extends Messages>(
     }
 
     if (options?.context) {
-      const contextual = resolveKey(messages, `${key}_${options.context}`)
-        ?? resolveKey(fallback, `${key}_${options.context}`);
+      const contextual = resolveKey(messages, `${key}_${options.context}`, nestedFallback)
+        ?? resolveKey(fallback, `${key}_${options.context}`, nestedFallback);
       if (contextual !== undefined) {
         resolved = contextual;
       }

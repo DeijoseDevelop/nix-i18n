@@ -32,3 +32,6 @@ coverage/
 
 # Extracted translation keys
 extracted-keys.json
+
+# Generated translation files
+translations.json

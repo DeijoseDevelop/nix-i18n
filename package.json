@@ -1,6 +1,6 @@
 {
   "name": "@deijose/nix-i18n",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Internationalization library for Nix.js built on signals and stores",
   "license": "MIT",
   "author": "Deiver Vasquez",
@@ -55,7 +55,8 @@
     "node": ">=18.0.0"
   },
   "bin": {
-    "nix-i18n-extract": "./dist/lib/cli/extract.js"
+    "nix-i18n-extract": "dist/lib/cli/extract.js",
+    "nix-i18n-generate": "dist/lib/cli/generate.js"
   },
   "scripts": {
     "dev": "vite",
@@ -66,7 +67,8 @@
     "prepack": "bun run clean:lib && bun run build:lib",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "extract": "bun run src/cli/extract.ts"
+    "extract": "bun run src/cli/extract.ts",
+    "generate": "bun run src/cli/generate.ts"
   },
   "peerDependencies": {
     "@deijose/nix-js": "^2.5.3"

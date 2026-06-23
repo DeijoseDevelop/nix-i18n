@@ -23,6 +23,7 @@ export type I18nOptions<TMessages extends Messages = Messages> = {
   namespaces?: string[];
   persist?: boolean | PersistOptions;
   detect?: boolean | DetectOptions;
+  nestedFallback?: boolean;
 };
 
 export type PersistOptions = {
@@ -59,6 +60,7 @@ export type I18nStore<TMessages extends Messages = Messages> = Store<
 
 export type I18nInstance<TMessages extends Messages = Messages> = I18nStore<TMessages> & {
   readonly fallbackLocale: string;
+  readonly nestedFallback: boolean;
   t: TranslateFn<TMessages>;
   n: PluralFn<TMessages>;
   d: DateFormatterFn;

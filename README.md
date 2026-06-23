@@ -12,9 +12,9 @@ Internationalization library for [Nix.js](https://nix-js.dev) built on signals a
 - Lazy-loaded namespaces.
 - Pluralization, contexts, and namespaces.
 - Date, number, currency, relative time, and list formatting.
-- Optional plugins for persistence, locale detection (URL, path, navigator, storage), router integration, form validation, head tags, cross-tab sync, and ICU pluralization.
+- Optional plugins for persistence, locale detection (URL, path, navigator, storage), router integration, form validation, head tags, cross-tab sync, ICU pluralization, and dev overlay for missing keys.
 - Optional `provide/inject` support for sub-trees and tenants.
-- CLI to extract translation keys from source files.
+- CLI to extract and generate translation keys from source files.
 
 ## Installation
 
@@ -63,6 +63,22 @@ Use the pipe syntax for plural forms:
 
 ```ts
 i18n.t("items", { count: 5 }); // "5 items"
+```
+
+## Nested fallback
+
+```ts
+const i18n = createI18n({
+  locale: "es",
+  nestedFallback: true,
+  messages: {
+    es: {
+      auth: { login: "Acceder" },
+    },
+  },
+});
+
+i18n.t("auth.login.title"); // "Acceder" fallback desde "auth.login"
 ```
 
 ## Namespaces
@@ -195,12 +211,26 @@ const messages = {
 i18n.t("items", { count: 5 }); // "5 items"
 ```
 
+### Dev overlay
+
+```ts
+import { devOverlayPlugin } from "@deijose/nix-i18n/plugins/devOverlay";
+
+devOverlayPlugin(i18n, { log: true, overlay: true });
+```
+
 ## CLI
 
 Extract translation keys from source files:
 
 ```bash
 npx nix-i18n-extract src --output extracted-keys.json
+```
+
+Generate a JSON translation file with empty values for multiple locales:
+
+```bash
+npx nix-i18n-generate src --locales es,en --output translations.json
 ```
 
 ## TypeScript

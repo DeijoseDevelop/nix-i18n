@@ -26,7 +26,9 @@
     "src/plugins/sync.ts",
     "src/plugins/head.ts",
     "src/plugins/icuPluralize.ts",
-    "src/cli/extract.ts"
+    "src/plugins/devOverlay.ts",
+    "src/cli/extract.ts",
+    "src/cli/generate.ts"
   ],
   "exclude": [
     "src/__tests__"

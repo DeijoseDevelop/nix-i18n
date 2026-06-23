@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0
+
+### Added
+
+- `nestedFallback` option for `createI18n` to enable fallback chains like `auth.login.title` → `auth.login` → `title`.
+- `nix-i18n-generate` CLI to generate JSON translation files with empty values for multiple locales.
+- `devOverlayPlugin` to log and optionally display missing translation keys in development.
+- Fixed `bin` path format in `package.json` to comply with npm requirements.
+
 ## 1.1.0
 
 ### Added

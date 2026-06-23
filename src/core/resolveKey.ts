@@ -3,13 +3,21 @@ import type { Messages } from "./types";
 export function resolveKey<TMessages extends Messages>(
   messages: Partial<TMessages>,
   key: string,
+  nestedFallback = false,
 ): string | undefined {
   if (!key) return undefined;
 
   const byPath = resolveByPath(messages, key);
   if (byPath !== undefined) return byPath;
 
-  return resolveExact(messages, key);
+  const exact = resolveExact(messages, key);
+  if (exact !== undefined) return exact;
+
+  if (nestedFallback) {
+    return resolveNestedFallback(messages, key);
+  }
+
+  return undefined;
 }
 
 function resolveByPath(messages: unknown, key: string): string | undefined {
@@ -32,12 +40,28 @@ function resolveExact(messages: unknown, key: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function resolveNestedFallback(messages: unknown, key: string): string | undefined {
+  const parts = key.split(/[:.]/).filter(Boolean);
+  for (let i = 1; i < parts.length; i++) {
+    const prefix = parts.slice(0, parts.length - i).join(".");
+    const byPath = resolveByPath(messages, prefix);
+    if (byPath !== undefined) return byPath;
+  }
+  for (let i = 1; i < parts.length; i++) {
+    const suffix = parts.slice(i).join(".");
+    const byPath = resolveByPath(messages, suffix);
+    if (byPath !== undefined) return byPath;
+  }
+  return undefined;
+}
+
 export function resolveKeyWithFallback<TMessages extends Messages>(
   messages: Partial<TMessages>,
   fallback: Partial<TMessages>,
   key: string,
+  nestedFallback = false,
 ): string | undefined {
-  return resolveKey(messages, key) ?? resolveKey(fallback, key);
+  return resolveKey(messages, key, nestedFallback) ?? resolveKey(fallback, key, nestedFallback);
 }
 
 export function applyContext(

@@ -9,10 +9,13 @@ export function detectLocalePlugin<TMessages extends Messages>(
   const urlParam = options.urlParam ?? "lang";
 
   for (const source of order) {
-    const detected = detectFrom(source, i18n, storageKey, urlParam);
-    if (detected && isLocaleSupported(i18n, detected)) {
-      i18n.setLocale(detected);
-      return;
+    const detected = detectFrom(source, i18n, storageKey, urlParam, options.pathPrefix);
+    if (detected) {
+      const normalized = normalizeLocale(i18n, detected);
+      if (normalized) {
+        i18n.setLocale(normalized);
+        return;
+      }
     }
   }
 
@@ -22,11 +25,24 @@ export function detectLocalePlugin<TMessages extends Messages>(
   }
 }
 
+function normalizeLocale<TMessages extends Messages>(
+  i18n: I18nInstance<TMessages>,
+  locale: string,
+): string | null {
+  const available = Object.keys(i18n.messages.value);
+  if (available.length === 0) return locale;
+  if (available.includes(locale)) return locale;
+  const base = locale.split("-")[0];
+  if (base && available.includes(base)) return base;
+  return null;
+}
+
 function detectFrom<TMessages extends Messages>(
   source: NonNullable<DetectOptions["order"]>[number],
   i18n: I18nInstance<TMessages>,
   storageKey: string,
   urlParam: string,
+  pathPrefix?: boolean | string,
 ): string | null {
   switch (source) {
     case "localStorage":
@@ -34,11 +50,20 @@ function detectFrom<TMessages extends Messages>(
     case "sessionStorage":
       return typeof sessionStorage !== "undefined" ? sessionStorage.getItem(storageKey) : null;
     case "navigator":
-      return typeof navigator !== "undefined" ? navigator.language : null;
+      return typeof globalThis.navigator !== "undefined" ? globalThis.navigator.language : null;
     case "url": {
-      if (typeof location === "undefined") return null;
-      const params = new URLSearchParams(location.search);
+      if (typeof globalThis.location === "undefined") return null;
+      const params = new URLSearchParams(globalThis.location.search);
       return params.get(urlParam);
+    }
+    case "path": {
+      if (typeof globalThis.location === "undefined" || pathPrefix === false) return null;
+      const prefix = typeof pathPrefix === "string" ? pathPrefix : "";
+      const path = prefix
+        ? globalThis.location.pathname.replace(new RegExp(`^/${prefix}/?`), "/")
+        : globalThis.location.pathname;
+      const parts = path.split("/").filter(Boolean);
+      return parts[0] ?? null;
     }
     case "fallback":
       return i18n.fallbackLocale ?? i18n.locale.value;

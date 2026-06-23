@@ -22,7 +22,11 @@
     "src/plugins/persist.ts",
     "src/plugins/detect.ts",
     "src/plugins/router.ts",
-    "src/plugins/forms.ts"
+    "src/plugins/forms.ts",
+    "src/plugins/sync.ts",
+    "src/plugins/head.ts",
+    "src/plugins/icuPluralize.ts",
+    "src/cli/extract.ts"
   ],
   "exclude": [
     "src/__tests__"

@@ -29,3 +29,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Extracted translation keys
+extracted-keys.json

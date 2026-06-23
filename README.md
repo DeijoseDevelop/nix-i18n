@@ -12,8 +12,9 @@ Internationalization library for [Nix.js](https://nix-js.dev) built on signals a
 - Lazy-loaded namespaces.
 - Pluralization, contexts, and namespaces.
 - Date, number, currency, relative time, and list formatting.
-- Optional plugins for persistence, locale detection, router integration, and form validation.
+- Optional plugins for persistence, locale detection (URL, path, navigator, storage), router integration, form validation, head tags, cross-tab sync, and ICU pluralization.
 - Optional `provide/inject` support for sub-trees and tenants.
+- CLI to extract translation keys from source files.
 
 ## Installation
 
@@ -147,6 +148,59 @@ detectLocalePlugin(i18n, {
 import { routerLocalePlugin } from "@deijose/nix-i18n/plugins/router";
 
 routerLocalePlugin(i18n, router, { mode: "query" });
+```
+
+### Head tags
+
+```ts
+import { headPlugin } from "@deijose/nix-i18n/plugins/head";
+
+headPlugin(i18n, {
+  lang: true,
+  dir: "auto",
+  meta: [{ name: "description", content: (locale) => descriptions[locale] }],
+});
+```
+
+### Cross-tab sync
+
+```ts
+import { syncLocalePlugin } from "@deijose/nix-i18n/plugins/sync";
+
+syncLocalePlugin(i18n);
+```
+
+### Form validation
+
+```ts
+import { formValidationPlugin } from "@deijose/nix-i18n/plugins/forms";
+
+const validators = formValidationPlugin(i18n, {
+  required: () => (value) => value ? undefined : "required",
+  minLength: (n) => (value) => String(value).length < n ? "minLength" : undefined,
+}, { keyPrefix: "errors" });
+```
+
+### ICU pluralization
+
+```ts
+import { icuPluralizePlugin } from "@deijose/nix-i18n/plugins/icuPluralize";
+
+icuPluralizePlugin(i18n);
+
+const messages = {
+  en: { items: "{count, plural, one {# item} other {# items}}" },
+};
+
+i18n.t("items", { count: 5 }); // "5 items"
+```
+
+## CLI
+
+Extract translation keys from source files:
+
+```bash
+npx nix-i18n-extract src --output extracted-keys.json
 ```
 
 ## TypeScript

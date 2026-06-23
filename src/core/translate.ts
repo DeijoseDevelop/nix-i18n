@@ -49,24 +49,30 @@ export function createTranslate<TMessages extends Messages>(
   }) as I18nInstance<TMessages>["t"];
 }
 
-export function createPlural(
-  t: TranslateFn,
-): PluralFn {
+type SimpleTranslate = (key: string, params?: InterpolationMap, options?: { context?: string }) => string;
+type SimplePlural = (count: number, key: string, params?: InterpolationMap) => string;
+
+export function createPlural<TMessages extends Messages>(
+  t: TranslateFn<TMessages>,
+): PluralFn<TMessages> {
+  const simple = t as SimpleTranslate;
   return ((count: number, key: string, params?: InterpolationMap) => {
-    return t(key, { ...(params ?? {}), count }, {});
-  }) as PluralFn;
+    return simple(key, { ...(params ?? {}), count });
+  }) as PluralFn<TMessages>;
 }
 
-export function createNamespaceApi(
-  t: TranslateFn,
-  n: PluralFn,
+export function createNamespaceApi<TMessages extends Messages>(
+  t: TranslateFn<TMessages>,
+  n: PluralFn<TMessages>,
   namespace: string,
-): NamespaceApi {
+): NamespaceApi<TMessages> {
+  const simpleT = t as SimpleTranslate;
+  const simpleN = n as SimplePlural;
   return {
     t: (key: string, params?: InterpolationMap, options?: { context?: string }) =>
-      t(`${namespace}:${key}` as never, params, options),
+      simpleT(`${namespace}:${key}`, params, options),
     n: (count: number, key: string, params?: InterpolationMap) =>
-      n(count, `${namespace}:${key}` as never, params),
+      simpleN(count, `${namespace}:${key}`, params),
   };
 }
 

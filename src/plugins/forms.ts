@@ -1,8 +1,9 @@
 import type { Validator } from "@deijose/nix-js";
-import type { I18nInstance, Messages } from "../core/types";
+import type { I18nInstance, InterpolationMap, Messages } from "../core/types";
 
 export type FormValidationPluginOptions = {
   keyPrefix?: string;
+  keyMap?: Record<string, string>;
 };
 
 export function formValidationPlugin<TMessages extends Messages>(
@@ -11,17 +12,18 @@ export function formValidationPlugin<TMessages extends Messages>(
   options: FormValidationPluginOptions = {},
 ): Record<string, (...args: unknown[]) => Validator<unknown>> {
   const prefix = options.keyPrefix ? `${options.keyPrefix}:` : "";
+  const keyMap = options.keyMap ?? {};
   const wrapped: Record<string, (...args: unknown[]) => Validator<unknown>> = {};
 
   for (const [name, factory] of Object.entries(validators)) {
     wrapped[name] = (...args: unknown[]) => {
+      const params = buildParams(name, args);
       const validator = factory(...args);
+      const key = `${prefix}${keyMap[name] ?? name}`;
       return (value: unknown) => {
         const result = validator(value);
         if (result) {
-          const key = `${prefix}${name}`;
-          const translated = i18n.t(key as never, result as never, {}) ?? result;
-          return translated;
+          return i18n.t(key as never, params as never, {});
         }
         return undefined;
       };
@@ -30,3 +32,32 @@ export function formValidationPlugin<TMessages extends Messages>(
 
   return wrapped;
 }
+
+function buildParams(name: string, args: unknown[]): InterpolationMap {
+  switch (name) {
+    case "minLength":
+      return { min: args[0] as number };
+    case "maxLength":
+      return { max: args[0] as number };
+    case "min":
+      return { min: args[0] as number };
+    case "max":
+      return { max: args[0] as number };
+    case "pattern":
+      return { pattern: String(args[0]) };
+    default:
+      return {};
+  }
+}
+
+export function createI18nValidator<TMessages extends Messages>(
+  i18n: I18nInstance<TMessages>,
+  key: string,
+  defaultMessage: string,
+): Validator<unknown> {
+  return (value: unknown) => {
+    const result = i18n.t(key as never, { value } as never, {});
+    return result === key ? defaultMessage : result;
+  };
+}
+

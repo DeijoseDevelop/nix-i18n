@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0
+
+### Added
+
+- `syncLocalePlugin` to synchronize locale across browser tabs via `BroadcastChannel`.
+- `headPlugin` to update `html lang`, `dir`, and meta tags on locale changes.
+- `detectLocalePlugin` now supports locale detection from URL path (`/es/about`) and base-locale normalization.
+- `formValidationPlugin` improved with key prefix mapping and interpolation parameters for validator arguments.
+- `icuPluralizePlugin` and `icuPluralize` utility for ICU plural syntax (`{count, plural, one {...} other {...}}`).
+- `nix-i18n-extract` CLI to extract translation keys from source files.
+- Type-safe key and interpolation parameter autocompletion via `MessageSchema`.
+- Full test coverage for all new plugins and utilities.
+
 ## 1.0.0
 
 ### Added

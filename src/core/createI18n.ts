@@ -36,7 +36,8 @@ export function createI18n<TMessages extends Messages = Messages>(
     c: createCurrencyFormatter(store),
     rt: createRelativeTimeFormatter(store),
     list: createListFormatter(store),
-    useNamespace: (namespace: string) => createNamespaceApi(t, n, namespace),
+    useNamespace: (namespace: string) =>
+      createNamespaceApi<TMessages>(t, n, namespace),
   });
 
   if (options.persist) {

@@ -10,7 +10,8 @@
     ],
     "types": [
       "vite/client",
-      "vitest/globals"
+      "vitest/globals",
+      "node"
     ],
     "skipLibCheck": true,
     "moduleResolution": "bundler",

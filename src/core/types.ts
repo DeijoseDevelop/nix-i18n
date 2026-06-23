@@ -31,9 +31,10 @@ export type PersistOptions = {
 };
 
 export type DetectOptions = {
-  order?: Array<"localStorage" | "sessionStorage" | "navigator" | "url" | "fallback">;
+  order?: Array<"localStorage" | "sessionStorage" | "navigator" | "url" | "path" | "fallback">;
   storageKey?: string;
   urlParam?: string;
+  pathPrefix?: boolean | string;
 };
 
 export type I18nStoreState<TMessages extends Messages = Messages> = {
@@ -58,38 +59,42 @@ export type I18nStore<TMessages extends Messages = Messages> = Store<
 
 export type I18nInstance<TMessages extends Messages = Messages> = I18nStore<TMessages> & {
   readonly fallbackLocale: string;
-  t: TranslateFn;
-  n: PluralFn;
+  t: TranslateFn<TMessages>;
+  n: PluralFn<TMessages>;
   d: DateFormatterFn;
   nFormat: NumberFormatterFn;
   c: CurrencyFormatterFn;
   rt: RelativeTimeFormatterFn;
   list: ListFormatterFn;
-  useNamespace: (namespace: string) => NamespaceApi;
+  useNamespace: (namespace: string) => NamespaceApi<TMessages>;
 };
 
-export type TranslateFn = (
-  key: MessagePath,
-  params?: InterpolationParamsForPath,
+export type TranslateFn<TMessages extends Messages = MessageSchema> = <
+  K extends MessagePath<TMessages>,
+>(
+  key: K,
+  params?: InterpolationParamsForPath<TMessages, K>,
   options?: { context?: string },
 ) => string;
 
-export type PluralFn = (
+export type PluralFn<TMessages extends Messages = MessageSchema> = <
+  K extends MessagePath<TMessages>,
+>(
   count: number,
-  key: MessagePath,
-  params?: InterpolationParamsForPath,
+  key: K,
+  params?: InterpolationParamsForPath<TMessages, K>,
 ) => string;
 
-export type NamespaceApi = {
-  t: (
-    key: MessagePath,
-    params?: InterpolationParamsForPath,
+export type NamespaceApi<TMessages extends Messages = MessageSchema> = {
+  t: <K extends MessagePath<TMessages>>(
+    key: K,
+    params?: InterpolationParamsForPath<TMessages, K>,
     options?: { context?: string },
   ) => string;
-  n: (
+  n: <K extends MessagePath<TMessages>>(
     count: number,
-    key: MessagePath,
-    params?: InterpolationParamsForPath,
+    key: K,
+    params?: InterpolationParamsForPath<TMessages, K>,
   ) => string;
 };
 
@@ -120,8 +125,50 @@ export type ListFormatterFn = (
   options?: Intl.ListFormatOptions,
 ) => string;
 
-export type MessagePath = string;
+export interface MessageSchema {
+  [key: string]: MessageValue;
+}
 
-export type InterpolationParamsForPath = InterpolationMap | undefined;
+type Counter = [never, 0, 1, 2, 3, 4, 5];
 
-export type InterpolationParams = InterpolationMap | undefined;
+type DeepPaths<T, Depth extends number = 5> = Depth extends never
+  ? string
+  : T extends string
+  ? ""
+  : T extends object
+  ? {
+    [K in keyof T & string]: K | `${K}.${DeepPaths<T[K], Counter[Depth]>}`;
+  }[keyof T & string]
+  : "";
+
+export type MessagePath<TMessages extends Messages = MessageSchema> =
+  DeepPaths<TMessages> | string;
+
+type ExtractInterpolationKeys<S extends string> =
+  S extends `${infer _Start}{${infer Key}}${infer Rest}`
+  ? Key extends `${infer Param}:${infer _Format}`
+  ? Param | ExtractInterpolationKeys<Rest>
+  : Key | ExtractInterpolationKeys<Rest>
+  : never;
+
+export type InterpolationParams<S extends string> = [ExtractInterpolationKeys<S>] extends [never]
+  ? InterpolationMap | undefined
+  : { [P in ExtractInterpolationKeys<S>]: InterpolationValue };
+
+type ResolveMessageType<T, K extends string> = K extends `${infer Head}.${infer Rest}`
+  ? Head extends keyof T
+  ? ResolveMessageType<T[Head], Rest>
+  : string
+  : K extends keyof T
+  ? T[K] extends string
+  ? T[K]
+  : string
+  : string;
+
+export type InterpolationParamsForPath<
+  TMessages extends Messages,
+  K extends MessagePath<TMessages>,
+> = K extends string
+  ? InterpolationParams<ResolveMessageType<TMessages, K>>
+  : InterpolationMap | undefined;
+

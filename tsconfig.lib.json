@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "declaration": true,
+    "declarationDir": "dist/lib",
+    "emitDeclarationOnly": true,
+    "rootDir": "src"
+  },
+  "include": [
+    "src/index.ts",
+    "src/format/date.ts",
+    "src/format/number.ts",
+    "src/format/currency.ts",
+    "src/format/relativeTime.ts",
+    "src/format/list.ts",
+    "src/format/index.ts",
+    "src/backends/object.ts",
+    "src/backends/json.ts",
+    "src/backends/api.ts",
+    "src/plugins/persist.ts",
+    "src/plugins/detect.ts",
+    "src/plugins/router.ts",
+    "src/plugins/forms.ts"
+  ],
+  "exclude": [
+    "src/__tests__"
+  ]
+}

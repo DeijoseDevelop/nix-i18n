@@ -1,6 +1,6 @@
 import { interpolate, readValue } from "./interpolate";
 import { pluralize, isPluralTemplate } from "./pluralize";
-import { resolveKey } from "./resolveKey";
+import { createResolveKeyCache } from "./resolveKey";
 import type {
   I18nInstance,
   InterpolationMap,
@@ -13,25 +13,22 @@ import type {
 export function createTranslate<TMessages extends Messages>(
   i18n: I18nInstance<TMessages>,
 ): I18nInstance<TMessages>["t"] {
+  const resolveCache = createResolveKeyCache();
+
   return ((key: string, params?: InterpolationMap, options?: { context?: string }) => {
     const locale = i18n.locale.value;
     const messages = i18n.currentMessages.value as Partial<TMessages>;
     const fallback = i18n.fallbackMessages.value as Partial<TMessages>;
     const nestedFallback = i18n.nestedFallback;
 
-    let resolved: string | undefined = resolveKey(messages, key, nestedFallback);
-
-    if (resolved === undefined && fallback) {
-      resolved = resolveKey(fallback, key, nestedFallback);
-    }
+    let resolved: string | undefined = resolveCache(messages, key, nestedFallback, fallback);
 
     if (resolved === undefined) {
       return key;
     }
 
     if (options?.context) {
-      const contextual = resolveKey(messages, `${key}_${options.context}`, nestedFallback)
-        ?? resolveKey(fallback, `${key}_${options.context}`, nestedFallback);
+      const contextual = resolveCache(messages, `${key}_${options.context}`, nestedFallback, fallback);
       if (contextual !== undefined) {
         resolved = contextual;
       }

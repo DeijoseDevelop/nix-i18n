@@ -1,6 +1,6 @@
 {
   "name": "@deijose/nix-i18n",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Internationalization library for Nix.js built on signals and stores",
   "license": "MIT",
   "author": "Deiver Vasquez",

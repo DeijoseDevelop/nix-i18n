@@ -1,5 +1,16 @@
 const PLURAL_CATEGORIES: Intl.LDMLPluralRule[] = ["zero", "one", "two", "few", "many", "other"];
 
+const pluralRulesCache = new Map<string, Intl.PluralRules>();
+
+function getPluralRules(locale: string): Intl.PluralRules {
+  let pr = pluralRulesCache.get(locale);
+  if (!pr) {
+    pr = new Intl.PluralRules(locale);
+    pluralRulesCache.set(locale, pr);
+  }
+  return pr;
+}
+
 export function pluralize(
   count: number,
   template: string,
@@ -19,7 +30,7 @@ export function pluralize(
       index = count === 0 ? 0 : count === 1 ? 1 : 2;
       break;
     default:
-      index = PLURAL_CATEGORIES.indexOf(new Intl.PluralRules(locale).select(count));
+      index = PLURAL_CATEGORIES.indexOf(getPluralRules(locale).select(count));
       break;
   }
 

@@ -64,6 +64,37 @@ export function resolveKeyWithFallback<TMessages extends Messages>(
   return resolveKey(messages, key, nestedFallback) ?? resolveKey(fallback, key, nestedFallback);
 }
 
+export function createResolveKeyCache() {
+  let messagesRef: unknown;
+  let fallbackRef: unknown;
+  const cache = new Map<string, string | undefined>();
+
+  return function cachedResolve<TMessages extends Messages>(
+    messages: Partial<TMessages>,
+    key: string,
+    nestedFallback = false,
+    fallback?: Partial<TMessages>,
+  ): string | undefined {
+    const currentMessages = messages;
+    const currentFallback = fallback;
+
+    if (currentMessages !== messagesRef || currentFallback !== fallbackRef) {
+      cache.clear();
+      messagesRef = currentMessages;
+      fallbackRef = currentFallback;
+    }
+
+    const cacheKey = nestedFallback + ":" + key;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+    const result = resolveKey(messages, key, nestedFallback)
+      ?? (fallback ? resolveKey(fallback, key, nestedFallback) : undefined);
+
+    cache.set(cacheKey, result);
+    return result;
+  };
+}
+
 export function applyContext(
   messages: Record<string, unknown>,
   key: string,

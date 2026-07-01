@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1
+
+### Performance
+
+- **A** — Cache `Intl` formatters (`NumberFormat`, `DateTimeFormat`, `RelativeTimeFormat`, `ListFormat`) by locale + options to avoid expensive re-instantiation on every call.
+- **B** — Cache `resolveKey` lookups per messages reference with automatic invalidation when messages or fallback change. Eliminates repeated object traversals for the same keys.
+- **C** — Cache `Intl.PluralRules` by locale to avoid creating a new instance on every pluralized translation.
+
 ## 1.2.0
 
 ### Added
